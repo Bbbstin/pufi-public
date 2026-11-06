@@ -84,12 +84,25 @@ usage() {
   echo "  --help                             show this help"
 }
 
+# Reports a clear error when a value-taking option (`--target <val>`, etc.) is
+# given without its argument, instead of dying on an unbound $2 under `set -u`.
+# Self-contained (no die()): the arg loop runs before the helper section below,
+# so die() is not yet defined here.
+die_missing_value() { # die_missing_value <flag>
+  printf '\033[1;31m[!] missing value for %s (usage: %s <value>; see --help)\033[0m\n' "$1" "$1" >&2
+  exit 1
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --target)   TARGET="$2"; shift 2 ;;
-    --opencode-dir) CUSTOM_DIR="$2"; shift 2 ;;
-    --persona)  PERSONA="$2"; shift 2 ;;
-    --skill)    SKILLS="$2"; shift 2 ;;
+    --target)
+      [[ $# -ge 2 ]] || die_missing_value "$1"; TARGET="$2"; shift 2 ;;
+    --opencode-dir)
+      [[ $# -ge 2 ]] || die_missing_value "$1"; CUSTOM_DIR="$2"; shift 2 ;;
+    --persona)
+      [[ $# -ge 2 ]] || die_missing_value "$1"; PERSONA="$2"; shift 2 ;;
+    --skill)
+      [[ $# -ge 2 ]] || die_missing_value "$1"; SKILLS="$2"; shift 2 ;;
     --setup-env) ACTION="setup_env"; shift ;;
     --smoke)     ACTION="smoke"; shift ;;
     --yes)       ASSUME_YES=1; shift ;;
